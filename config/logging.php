@@ -73,7 +73,6 @@ return [
             'replace_placeholders' => true,
         ],
 
-        // Bổ sung kênh nhật ký nghiệp vụ riêng biệt phục vụ chấm điểm B3
         'nghiepvu' => [
             'driver' => 'daily',
             'path' => storage_path('logs/nghiepvu.log'),

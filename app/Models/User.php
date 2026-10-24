@@ -9,22 +9,28 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable; // <-- 2. Thêm HasApiTokens vào đây
+    use HasApiTokens, HasFactory, Notifiable;
+
     public $timestamps = false;
+
     protected $fillable = [
         'name',
         'email',
-        'password_hash', // Đảm bảo có cột này trong fillable
+        'password_hash', // Giữ nguyên tên cột theo database
         'role',
+        'status',
     ];
 
     protected $hidden = [
-        'password_hash', // Ẩn cột mật khẩu khi trả về JSON
+        'password_hash', // Ẩn trường này khi trả về JSON
         'remember_token',
     ];
 
-    public function getAuthPassword()
+    /**
+     * Báo cho Laravel biết cột nào dùng để lưu mật khẩu xác thực
+     */
+    public function getAuthPasswordName()
     {
-        return $this->password_hash;
+        return 'password_hash';
     }
 }

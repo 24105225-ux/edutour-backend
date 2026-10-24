@@ -75,7 +75,7 @@ class BookingController extends Controller
                     'code' => $booking->code
                 ]
             ], 201);
-
+           
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
