@@ -45,10 +45,11 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         try {
-            // Chỉ lưu đúng những gì bảng bookings đang có sẵn trên Database Aiven
+            // Truyền đầy đủ mã code bắt buộc của bảng bookings
             $booking = Booking::create([
                 'tour_id'    => (int) $request->tour_id,
                 'status'     => 'pending_payment',
+                'code'       => 'EDT-' . strtoupper(substr(uniqid(), -6)), // Tự động sinh mã ngẫu nhiên
                 'created_at' => now()
             ]);
 

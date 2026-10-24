@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
 {
-    // Tắt timestamps vì bảng chỉ có created_at, không có updated_at
     public $timestamps = false;
 
     protected $fillable = [
         'tour_id',
         'status',
+        'code',
         'created_at'
     ];
 
