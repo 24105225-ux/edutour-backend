@@ -45,11 +45,12 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         try {
-            // Truyền đầy đủ mã code bắt buộc của bảng bookings
+            // Thêm school_id = 1 để vượt qua ràng buộc bắt buộc của Database Aiven
             $booking = Booking::create([
                 'tour_id'    => (int) $request->tour_id,
+                'school_id'  => 1, 
                 'status'     => 'pending_payment',
-                'code'       => 'EDT-' . strtoupper(substr(uniqid(), -6)), // Tự động sinh mã ngẫu nhiên
+                'code'       => 'EDT-' . strtoupper(substr(uniqid(), -6)),
                 'created_at' => now()
             ]);
 
@@ -60,6 +61,7 @@ class BookingController extends Controller
                     'id' => $booking->id
                 ]
             ], 201);
+
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
