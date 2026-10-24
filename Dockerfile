@@ -17,19 +17,25 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
+# Cài thư viện và xóa bộ đệm cũ
 RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# XÓA TOÀN BỘ CACHE CŨ BỊ LƯU TỪ MÁY TÍNH CÁ NHÂN (Thủ phạm chính)
 RUN rm -rf bootstrap/cache/*.php
 
+# Cấp quyền ghi cho các thư mục quan trọng
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
 
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -s 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -s 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
-RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+# ÉP APACHE NHẬN ĐƯỜNG DẪN LARAVEL BẰNG VIRTUALHOST
+RUN echo "<VirtualHost *:80>\n\
+    DocumentRoot /var/www/html/public\n\
+    <Directory /var/www/html/public>\n\
+        Options Indexes FollowSymLinks\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>\n\
+</VirtualHost>" > /etc/apache2/sites-available/000-default.conf
 
+# Kích hoạt module điều hướng và headers
 RUN a2enmod rewrite headers
 
 EXPOSE 80
