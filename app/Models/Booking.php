@@ -19,10 +19,15 @@ class Booking extends Model
         'created_at'
     ];
 
+    // Khai báo quan hệ tới bảng schools
+    public function school()
+    {
+        return $this->belongsTo(School::class, 'school_id');
+    }
 
-    // Khai báo liên kết đến tour nếu cần
+    // Khai báo quan hệ tới bảng tours
     public function tour()
     {
-        return $this->belongsTo(Tour::class);
+        return $this->belongsTo(Tour::class, 'tour_id');
     }
 }

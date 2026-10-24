@@ -88,21 +88,22 @@ class BookingController extends Controller
      * Xem chi tiết thông tin một đơn đặt tour kèm danh sách học sinh tham gia.
      */
     public function show(Request $request, int $id)
-    {
-        $booking = Booking::with(['tour', 'school', 'participants', 'payments'])->find($id);
+{
+    // Load kèm tour để trang checkout có đủ dữ liệu hiển thị
+    $booking = Booking::with(['tour'])->find($id);
 
-        if (!$booking) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Không tìm thấy đơn đặt tour!'
-            ], 404);
-        }
-
+    if (!$booking) {
         return response()->json([
-            'status' => 'success',
-            'data' => $booking
-        ], 200);
+            'status' => 'error',
+            'message' => 'Không tìm thấy đơn đặt tour!'
+        ], 404);
     }
+
+    return response()->json([
+        'status' => 'success',
+        'data' => $booking
+    ], 200);
+}
 
     /**
      * Cập nhật trạng thái đơn hàng (Xác nhận thanh toán hoặc đổi trạng thái).
