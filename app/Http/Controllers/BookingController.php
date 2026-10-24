@@ -48,24 +48,26 @@ class BookingController extends Controller
             $user = $request->user();
             $userId = $user ? $user->id : 1;
 
-            // Tạo trực tiếp đơn hàng từ dữ liệu Frontend gửi lên để chạy mượt mà ngay lập tức
+            // Chỉ lưu các cột chuẩn mực có sẵn trong bảng bookings của Database Aiven
             $booking = Booking::create([
-                'user_id'            => $userId,
-                'tour_id'            => (int) $request->tour_id,
-                'school_name'        => $request->school_name,
-                'contact_person'     => $request->contact_person,
-                'phone'              => $request->phone,
-                'number_of_students' => (int) $request->number_of_students,
-                'total_price'        => $request->total_price,
-                'status'             => $request->status ?? 'pending_payment',
-                'code'               => 'EDT-' . strtoupper(uniqid())
+                'user_id'       => $userId,
+                'tour_id'       => (int) $request->tour_id,
+                'pax'           => (int) ($request->number_of_students ?? 30),
+                'service_date'  => now()->addDays(7)->format('Y-m-d'), // Tự động chọn ngày đi sau 7 ngày nếu form chưa có
+                'total_amount'  => $request->total_price,
+                'status'        => 'pending_payment',
+                'code'          => 'EDT-' . strtoupper(uniqid())
             ]);
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Đăng ký đặt tour thành công! Vui lòng hoàn tất thanh toán.',
-                'data' => $booking
+                'data' => [
+                    'id' => $booking->id,
+                    'code' => $booking->code
+                ]
             ], 201);
+
         } catch (\Exception $e) {
             Log::error('Lỗi tạo đơn đặt tour:', [
                 'error' => $e->getMessage()
