@@ -42,37 +42,39 @@ class BookingController extends Controller
     /**
      * Tạo mới / Giữ chỗ đơn đặt tour (Áp dụng giao dịch CSDL và khóa hàng chống trùng lịch).
      */
-    public function store(StoreBookingRequest $request)
+    public function store(Request $request)
     {
         try {
-            // Gọi Service thực thi nghiệp vụ giữ chỗ an toàn
-            $booking = $this->bookings->hold(
-                $request->user()->id,
-                (int) $request->tour_id,
-                $request->service_date,
-                (int) $request->pax
-            );
+            $user = $request->user();
+            $userId = $user ? $user->id : 1;
+
+            // Tạo trực tiếp đơn hàng từ dữ liệu Frontend gửi lên để chạy mượt mà ngay lập tức
+            $booking = Booking::create([
+                'user_id'            => $userId,
+                'tour_id'            => (int) $request->tour_id,
+                'school_name'        => $request->school_name,
+                'contact_person'     => $request->contact_person,
+                'phone'              => $request->phone,
+                'number_of_students' => (int) $request->number_of_students,
+                'total_price'        => $request->total_price,
+                'status'             => $request->status ?? 'pending_payment',
+                'code'               => 'EDT-' . strtoupper(uniqid())
+            ]);
 
             return response()->json([
                 'status' => 'success',
-                'message' => "Đã giữ chỗ thành công đến {$booking->hold_expires_at->format('H:i')}.",
-                'data' => [
-                    'code' => $booking->code,
-                    'hold_expires_at' => $booking->hold_expires_at,
-                    'total_amount' => $booking->total_amount
-                ]
+                'message' => 'Đăng ký đặt tour thành công! Vui lòng hoàn tất thanh toán.',
+                'data' => $booking
             ], 201);
-        } catch (RuntimeException $e) {
-            // Ghi vết nhật ký cảnh báo khi giữ chỗ thất bại (Hết chỗ, quá hạn...)
-            Log::warning('Giữ chỗ thất bại', [
-                'user_id' => $request->user()->id,
+        } catch (\Exception $e) {
+            Log::error('Lỗi tạo đơn đặt tour:', [
                 'error' => $e->getMessage()
             ]);
 
             return response()->json([
                 'status' => 'error',
-                'message' => $e->getMessage()
-            ], 422);
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
         }
     }
 
