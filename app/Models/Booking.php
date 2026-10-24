@@ -9,12 +9,16 @@ class Booking extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'tour_id',
-        'school_id',
-        'status',
         'code',
+        'school_id',
+        'tour_id',
+        'service_date',
+        'pax',
+        'total_amount',
+        'status',
         'created_at'
     ];
+
 
     // Khai báo liên kết đến tour nếu cần
     public function tour()

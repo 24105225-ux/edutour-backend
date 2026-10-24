@@ -45,20 +45,34 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         try {
-            // Thêm school_id = 1 để vượt qua ràng buộc bắt buộc của Database Aiven
+            // Lấy school_id từ user đang đăng nhập (nếu là trường học) hoặc mặc định là 1
+            $user = $request->user();
+            $schoolId = 1;
+            if ($user) {
+                $school = \App\Models\School::where('user_id', $user->id)->first();
+                if ($school) {
+                    $schoolId = $school->id;
+                }
+            }
+
+            // Tạo đơn đặt tour chuẩn chỉnh khớp tuyệt đối với cấu trúc SQL
             $booking = Booking::create([
-                'tour_id'    => (int) $request->tour_id,
-                'school_id'  => 1, 
-                'status'     => 'pending_payment',
-                'code'       => 'EDT-' . strtoupper(substr(uniqid(), -6)),
-                'created_at' => now()
+                'code'         => 'ED' . str_pad(mt_rand(1, 9999999), 9, '0', STR_PAD_LEFT),
+                'school_id'    => $schoolId,
+                'tour_id'      => (int) $request->tour_id,
+                'service_date' => $request->service_date ?? now()->addDays(7)->format('Y-m-d'),
+                'pax'          => (int) ($request->number_of_students ?? 30),
+                'total_amount' => (float) ($request->total_price ?? 450000),
+                'status'       => 'pending_payment',
+                'created_at'   => now()
             ]);
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Đăng ký đặt tour thành công!',
                 'data' => [
-                    'id' => $booking->id
+                    'id' => $booking->id,
+                    'code' => $booking->code
                 ]
             ], 201);
 
