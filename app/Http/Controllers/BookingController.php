@@ -45,34 +45,21 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         try {
-            $user = $request->user();
-            $userId = $user ? $user->id : 1;
-
-            // Chỉ lưu các cột chuẩn mực có sẵn trong bảng bookings của Database Aiven
+            // Chỉ lưu đúng những gì bảng bookings đang có sẵn trên Database Aiven
             $booking = Booking::create([
-                'user_id'       => $userId,
-                'tour_id'       => (int) $request->tour_id,
-                'pax'           => (int) ($request->number_of_students ?? 30),
-                'service_date'  => now()->addDays(7)->format('Y-m-d'), // Tự động chọn ngày đi sau 7 ngày nếu form chưa có
-                'total_amount'  => $request->total_price,
-                'status'        => 'pending_payment',
-                'code'          => 'EDT-' . strtoupper(uniqid())
+                'tour_id'    => (int) $request->tour_id,
+                'status'     => 'pending_payment',
+                'created_at' => now()
             ]);
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Đăng ký đặt tour thành công! Vui lòng hoàn tất thanh toán.',
+                'message' => 'Đăng ký đặt tour thành công!',
                 'data' => [
-                    'id' => $booking->id,
-                    'code' => $booking->code
+                    'id' => $booking->id
                 ]
             ], 201);
-
         } catch (\Exception $e) {
-            Log::error('Lỗi tạo đơn đặt tour:', [
-                'error' => $e->getMessage()
-            ]);
-
             return response()->json([
                 'status' => 'error',
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()

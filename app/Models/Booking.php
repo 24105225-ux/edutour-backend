@@ -2,24 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
 {
-    use HasFactory;
+    // Tắt timestamps vì bảng chỉ có created_at, không có updated_at
+    public $timestamps = false;
 
     protected $fillable = [
-        'school_name',
-        'contact_person',
-        'phone',
         'tour_id',
-        'number_of_students',
-        'total_price',
         'status',
+        'created_at'
     ];
 
-    // Thiết lập quan hệ để lấy thông tin Tour khi cần
+    // Khai báo liên kết đến tour nếu cần
     public function tour()
     {
         return $this->belongsTo(Tour::class);
