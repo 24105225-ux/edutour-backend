@@ -6,8 +6,9 @@ use Illuminate\Validation\Rule;
 class StoreBookingRequest extends FormRequest
 {
     // Mở khóa cho cả admin và nhà trường (hoặc ai đã đăng nhập) đều được test đặt tour
-    public function authorize(): bool { 
-        return $this->user() !== null; 
+    public function authorize(): bool
+    {
+        return true; 
     }
 
     public function rules(): array
