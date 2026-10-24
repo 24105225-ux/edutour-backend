@@ -35,3 +35,12 @@ Route::prefix('v1')->group(function () {
     });
 
 });
+
+Route::get('/test-db', function () {
+    try {
+        \DB::connection()->getPdo();
+        return response()->json(['status' => 'Thành công', 'message' => 'Đã kết nối Database Aiven mượt mà!']);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'Thất bại', 'message' => 'Lỗi: ' . $e->getMessage()]);
+    }
+});
