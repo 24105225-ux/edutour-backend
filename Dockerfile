@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# Cài đặt các extension cần thiết cho Laravel
+# Cài đặt extension
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -14,17 +14,18 @@ RUN apt-get update && apt-get install -y \
 # Cài đặt Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Thiết lập thư mục làm việc
 WORKDIR /var/www/html
 COPY . .
 
 # Phân quyền thư mục
-RUN chown -R www-data:storage /var/www/html/storage 2>/dev/null || true
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
 
-# Cấu hình DocumentRoot của Apache trỏ vào thư mục public của Laravel
+# Cấu hình DocumentRoot và cho phép .htaccess hoạt động
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -s 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -s 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 RUN a2enmod rewrite
 
